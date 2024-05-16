@@ -1,0 +1,197 @@
+---
+title: "Final Project (CI, HT, and LR)"
+author: "Anthony Ramirez-Mata"
+date: "2024-05-16"
+output: html_notebook
+---
+
+
+# Find this code also on my GitHub "staticburnttoast"
+# https://github.com/staticburnttoast/DATA105-Project
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# inject data
+# data is listed and categorised into columns and rows
+```{r}
+test_data = read.csv("/Users/imnot/Downloads/test_results.csv")
+
+head(test_data)
+show(test_data)
+```
+
+# data details
+# gives a `summary` of each column, such as minimums and maximums, quartiles, and mean medians and modes
+# identifies the number of observations in a column and their type
+```{r}
+summary(test_data)
+str(test_data)
+```
+
+# column and rows
+# number of columns and rows, the names of columns
+```{r}
+ncol(test_data) # columns
+nrow(test_data) # rows
+colnames(test_data) # column titles
+```
+
+# column statistic of a specific column -> test_score
+# lists the statistical information of a chosen column
+```{r}
+mean(test_data$test_score)
+median(test_data$test_score)
+sd(test_data$test_score)
+var(test_data$test_score)
+sum(test_data$test_score)
+range = max(test_data$test_score) - min(test_data$test_score)
+print(range)
+quantile(test_data$test_score)
+coefficientOfVariation = sd(test_data$test_score) / mean(test_data$test_score)
+print(coefficientOfVariation)
+z_scores = (test_data$test_score - mean(test_data$test_score)) / sd(test_data$test_score)
+print(z_scores)
+```
+
+# correlation and covariance of two columns -> yrs_experience & salary
+# lists the correlation and covariance between two chosen columns
+```{r}
+cor(test_data$yrs_experience, test_data$salary)
+cov(test_data$yrs_experience, test_data$salary)
+```
+
+# correlation graph of data columns
+# creates a graph based on the correlation of two columns
+# the more blue and larger the dot, the greater the correlation
+# the more red and smaller the dot, the lower the correlation
+```{r}
+library(corrplot)
+
+M2 = cor(test_data[,c("yrs_experience", "test_score", "salary")])
+corrplot(M2, method = "number")
+corrplot(M2)
+```
+
+# histogram and skewness value
+# creates a histogram and identifies the frequency of a chosen column
+# prints the skewness of a column
+```{r}
+hist(test_data$test_score, xlab = "test score", ylab = "frequency", main = "test score histogram", col = "pink", labels = TRUE)
+
+library(moments)
+skewness(test_data$test_score)
+```
+
+
+# scatter plot
+# creates a scatter plot of two chosen columns
+```{r}
+plot(test_data$test_score, test_data$salary, xlab = "test score", ylab = "salary", col = "blue")
+```
+
+# scatter plot with linear regression line
+```{r}
+plot(y = test_data$test_score, x = test_data$salary, xlab = "salary", ylab = "test_score", main = "the relationship between salary and test scores", pch = 16)
+abline(lm(test_score ~ salary, data = test_data), col = "blue")
+```
+
+# 3D scatter plot
+```{r}
+library(scatterplot3d)
+
+scatterplot3d(x = test_data$yrs_experience, y = test_data$test_score, z = test_data$salary,
+              color = "blue",
+              pch = 16,
+              xlab = "years experience",
+              ylab = "test scores",
+              zlab = "salary",
+              main = "3D scatterplot of the test data")
+```
+
+# box plot
+```{r}
+boxplot(test_data[,c("yrs_experience", "salary")])
+```
+
+# violin plot
+```{r}
+library(vioplot)
+vioplot(test_data$yrs_experience, test_data$test_score, test_data$salary)
+```
+
+# density plot
+```{r}
+library(lattice)
+densityplot(~test_data$test_score, main = "density plot", xlab = "salary", col = "blue")
+
+plot(density(test_data$yrs_experience), col = "purple")
+lines(density(test_data$salary), col = "pink")
+```
+
+# categorical column to data
+```{r}
+test_data$category = "high"
+test_data$category[test_data$test_score < median(test_data$test_score)] = "low"
+test_data$category[test_data$test_score == max(test_data$test_score)] = "max"
+show(test_data)
+```
+
+# frequency table
+```{r}
+freq_tbl_rate_cat = table(test_data$category)
+print(freq_tbl_rate_cat)
+```
+
+# barplot from frequency table
+```{r}
+barplot(freq_tbl_rate_cat, xlab = "categories of test data", ylab = "frequency", main = "test data categories")
+```
+
+# pie chart
+```{r}
+pie(freq_tbl_rate_cat)
+pie(freq_tbl_rate_cat, paste0(freq_tbl_rate_cat, "%"), col = "violet")
+```
+
+# confidence intervals
+```{r}
+model = lm(test_score~1, test_data)
+confint(model, data=test_data)
+```
+
+# hypothesis testing
+```{r}
+t.test(test_data$test_score, mu = 700, conf.level = .95)
+```
+
+# hypothesis testing pt.2
+```{r}
+t.test(test_data$test_score, test_data$salary, conf.level = .95)
+```
+
+# linear regression model
+```{r}
+lr_model = lm(yrs_experience ~ salary, data = test_data)
+summary(lr_model)
+```
+
+# predictions on model
+# with a salary of 60, we can see approximately 16 years of experience, while a salary of 100 equals 31 years of experience. (wow...)
+```{r}
+data_prediction = data.frame(salary = c(60, 100))
+
+predict(lr_model, data_prediction)
+```
+
+# graphing linear regression
+```{r}
+plot(test_data$salary, test_data$yrs_experience, 
+     main = "Linear Regression", 
+     xlab = "Salary", ylab = "Years of Experience",
+     pch = 19, col = "orange")
+
+abline(lr_model, col = "cyan")
+```
